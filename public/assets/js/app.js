@@ -28,12 +28,20 @@ $(document).ready(() => {
             url: '/comments' + articleId
         }).then(result =>{
             console.log(result)
+            $('#comment-body').empty()
             let commentContent = result.notes
-            if(commentContent.lenght > 0){
-                let commentRow = $('<tr>')
-                let commentCell = $('<td>').html(commentContent).appendTo(commentRow)
-                let delButton = $('<td>').html("<button class='btn btn-default delComment'>Delete</button>").appendTo(commentRow)
-                $('#comment-body').append(commentRow)
+            if(commentContent.length > 0){
+                commentContent.forEach(comment => {
+                    let commentRow = $('<tr>').attr('data-id', comment._id)
+                    let commentCell = $('<td>').html(comment.body).appendTo(commentRow)
+                    let delButton = $('<td>').html(`
+                    <button class='btn btn-default delComment'>
+                    <i class='far fa-trash-alt'></i>
+                    </button>`).appendTo(commentRow)
+                    $('#comment-body').append(commentRow)
+                    
+                });
+
             }
 
             $('#comment-modal').attr('data-id', articleId).modal('show')
@@ -44,11 +52,8 @@ $(document).ready(() => {
         event.preventDefault();
         let commentContent = $('#user-comment').val().trim()
         let articleId = $('#comment-modal').data('id')
-        if(commentContent.length > 0){
-            let commentRow = $('<tr>')
-            let commentCell = $('<td>').html(commentContent).appendTo(commentRow)
-            let delButton = $('<td>').html("<button class='btn btn-default delComment'>Delete</button>").appendTo(commentRow)
-            $('#comment-body').append(commentRow)
+        if(commentContent.length > 0 && userId !== null){
+            $('#user-comment').val('')
             $.ajax({
                 type: 'POST',
                 url: '/comments' + articleId,
@@ -58,9 +63,19 @@ $(document).ready(() => {
                     }
             }).then(result => {
                 console.log(result)
+                let commentRow = $('<tr>')
+                let commentCell = $('<td>').html(result.body).appendTo(commentRow)
+                let delButton = $('<td>').html(
+                    `<button class='btn btn-default delComment'>
+                        <i class='far fa-trash-alt'></i>
+                    </button>`)
+                    .appendTo(commentRow)
+                $('#comment-body').append(commentRow)
             })
         }
     })
+
+
 
     $('body').on('click', '.add-favorite', function(){
         event.preventDefault();

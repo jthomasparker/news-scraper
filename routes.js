@@ -57,6 +57,7 @@ app.get('/comments:articleId', (req, res) => {
     db.Article.findById(req.params.articleId)
     .populate('notes')
     .then(dbArticle => {
+        console.log(dbArticle)
         res.json(dbArticle)
     })
 })
@@ -68,8 +69,9 @@ app.post('/comments:articleId', (req, res) => {
     })
     .then(dbNote => {
         db.Article.findByIdAndUpdate(req.params.articleId, {$push: {notes: dbNote._id}}, {new: true})
-        db.User.findByIdAndUpdate(req.body.user, {$push: {notes: dbNote._id}})
-        res.json(dbNote)
+        .then(res.json(dbNote))
+       // db.User.findByIdAndUpdate(req.body.user, {$push: {notes: dbNote._id}})
+        
     })
     
 })
