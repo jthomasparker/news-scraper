@@ -29,40 +29,54 @@ app.post('/favorite', (req, res) => {
     .then(dbUser => res.json(dbUser))
 })
 
-app.get('/favorites:userId', (req, res) => {
+app.get('/test', (req, res) => {
+    res.render("favorites", function(err, html){
+        res.send(html)
+    })
+ //  res.send("hello world")
+})
+
+app.get('/favorites/:userId', (req, res) => {
     db.User.findById(req.params.userId)
    // .populate("articles")
     .then(dbUser => {
       //  console.log(dbUser.articles)
       //  res.json(dbUser)
-      return db.Article.find({
+       db.Article.find({
           '_id': {$in: dbUser.articles}
+        }).then(dbArticles => {
+
+            res.render("favorites", {articles: dbArticles})
+           //     res.send(html)
+          //  })
         })
         //.populate('notes')
     })
-    .then(dbArticles => {
+   // .then(dbArticles => {
       //  res.json(dbArticles)
-      let hbsObject = { articles: dbArticles }
+    //  let hbsObject = { articles: dbArticles }
      // console.log(hbsObject)
-      res.render("favorites", {title: "made it"})
+   //   res.render("favorites", {title: "made it"})
         /*, whichPartial: function() {
         return "favorites";
    }
 })*/
   //  res.json(dbArticles)
-    })
+   // })
 })
 
-app.get('/comments:articleId', (req, res) => {
+app.get('/comments/:articleId', (req, res) => {
+    console.log(req.params.articleId)
     db.Article.findById(req.params.articleId)
     .populate('notes')
     .then(dbArticle => {
-        console.log(dbArticle)
+      //  console.log(dbArticle)
         res.json(dbArticle)
     })
 })
 
-app.post('/comments:articleId', (req, res) => {
+app.post('/comments/:articleId', (req, res) => {
+    console.log(req.params.articleId)
     db.Note.create({
         body: req.body.comment,
         user: req.body.user
@@ -74,6 +88,20 @@ app.post('/comments:articleId', (req, res) => {
         
     })
     
+})
+
+app.delete('/comments:commentId', (req, res) => {
+    let commentId = req.params.commentId
+    let articleId = req.body.articleId
+    db.Note.deleteOne({_id: commentId})
+    .then(result => {
+        console.log(result)
+        db.Article.findById(articleId).populate('notes')
+        .then(dbArticle => {
+            res.json(dbArticle)
+        })
+       // res.redirect('../comments/' + articleId)
+    })
 })
 
 app.get('/', function(req, res){

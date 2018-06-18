@@ -1,5 +1,16 @@
 
 <div class="col-xs-12">
-<h1>Made it</h1>
-{{title}}
+    <div class="card-columns">
+        {{#each articles}}
+            {{> article-card}}
+        {{/each}}
+    </div>
 </div>
+
+<script>
+    $('a.add-favorite').children().removeClass('far').addClass('fas')
+    $('#favorites').html("All Articles").attr('href', '/').removeClass('disabled').on('click', function(){
+        signIn(localStorage.getItem('user'))
+    })
+    $('#user').addClass('disabled')
+</script>
