@@ -8,9 +8,7 @@
 </div>
 
 <script>
-    $('a.add-favorite').children().removeClass('far').addClass('fas')
-    $('#favorites').html("All Articles").attr('href', '/').removeClass('disabled').on('click', function(){
-        signIn(localStorage.getItem('user'))
-    })
-    $('#user').addClass('disabled')
+
+    $('#favorites').html("All Articles").attr('href', '/').removeClass('disabled').addClass("displayed")
+
 </script>

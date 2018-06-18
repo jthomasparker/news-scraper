@@ -5,18 +5,7 @@ const mongoose = require("mongoose")
 
 module.exports = function(app){
 
-    /*
-app.get('/', (req, res) => {
-    db.Article.find({source: "The Nation"}).sort('_id').limit(10)
-    .then(dbArticles => {
-        let hbsObject = {
-            articles: dbArticles
-        }
-        res.json(hbsObject)
-    })
-    .catch(err => res.json(err))
-})
-*/
+
 app.get('/user/:username', (req, res) => {
     db.User.createUnique({username: req.params.username})
     .then(dbUser => {
@@ -25,44 +14,31 @@ app.get('/user/:username', (req, res) => {
 })
 
 app.post('/favorite', (req, res) => {
+    console.log(req.body)
+    if(req.body.delete === 'true'){
+        db.User.findByIdAndUpdate(req.body.userId, { $pull: { articles: req.body.articleId }}, {new: true})
+        .then(dbUser => res.json(dbUser))
+    } else {
     db.User.findByIdAndUpdate(req.body.userId, { $push: { articles: req.body.articleId }}, {new: true})
     .then(dbUser => res.json(dbUser))
+    }
 })
 
-app.get('/test', (req, res) => {
-    res.render("favorites", function(err, html){
-        res.send(html)
-    })
- //  res.send("hello world")
-})
 
 app.get('/favorites/:userId', (req, res) => {
     db.User.findById(req.params.userId)
-   // .populate("articles")
     .then(dbUser => {
-      //  console.log(dbUser.articles)
-      //  res.json(dbUser)
+
        db.Article.find({
           '_id': {$in: dbUser.articles}
         }).then(dbArticles => {
 
             res.render("favorites", {articles: dbArticles})
-           //     res.send(html)
-          //  })
+
         })
-        //.populate('notes')
+
     })
-   // .then(dbArticles => {
-      //  res.json(dbArticles)
-    //  let hbsObject = { articles: dbArticles }
-     // console.log(hbsObject)
-   //   res.render("favorites", {title: "made it"})
-        /*, whichPartial: function() {
-        return "favorites";
-   }
-})*/
-  //  res.json(dbArticles)
-   // })
+
 })
 
 app.get('/comments/:articleId', (req, res) => {
@@ -84,7 +60,6 @@ app.post('/comments/:articleId', (req, res) => {
     .then(dbNote => {
         db.Article.findByIdAndUpdate(req.params.articleId, {$push: {notes: dbNote._id}}, {new: true})
         .then(res.json(dbNote))
-       // db.User.findByIdAndUpdate(req.body.user, {$push: {notes: dbNote._id}})
         
     })
     
@@ -100,7 +75,6 @@ app.delete('/comments:commentId', (req, res) => {
         .then(dbArticle => {
             res.json(dbArticle)
         })
-       // res.redirect('../comments/' + articleId)
     })
 })
 
@@ -127,12 +101,6 @@ app.get('/', function(req, res){
                 author: author,
                 source: "Reason"
             }
-          /*  request(link, (error, response, html) => {
-                let $ = cheerio.load(html)
-                let newImg = $("div.postcontent").find("img").attr("src")
-                article.img = newImg
-                reason.push(article)
-            })*/
           reason.push(article)
 
         });
@@ -182,29 +150,20 @@ app.get('/', function(req, res){
                 })
 
                 db.Article.createUnique(reason)
-               // .populate('notes')
+
                 .then(reasonArticles => {
                    resultsObj.reason = reasonArticles
                     return db.Article.createUnique(nation)
                 })
-              //  .populate('notes')
+
                 .then(nationArticles => {
                     resultsObj.nation = nationArticles
                     return db.Article.createUnique(natReview)
                 })
-               // .populate('notes')
+
                 .then(natReviewArticles => {
                     resultsObj.natReview = natReviewArticles
-                  /*  resultsObj.whichPartial = function() {
-                        return "all";
-                   } */
-                    console.log(resultsObj)
-                 /*   var testObj = {
-                        test: [reason, nation, natReview]
-    
-                    } */
                     res.render("index", resultsObj)
-                 //  res.render("favorites", testObj)
                 })
                 
             })

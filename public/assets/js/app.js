@@ -4,8 +4,8 @@ let articleId;
 
 $(document).ready(() => {
 
-    if(localStorage.getItem(user) !== null ){
-        signIn(localStorage.getItem(user))
+    if(localStorage["user"] ){
+        signIn(localStorage.getItem("user"))
     }
     $('body').on('click', function(){
         if($(this).hasClass('disabled')){
@@ -44,7 +44,6 @@ $(document).ready(() => {
 
     $('#comment-body').on('click', '.delComment', function(){
         let commentId = $(this).data('id')
-       // let articleId = $('#comment-modal').data('id')
         $.ajax({
             type: 'DELETE',
             url: '/comments' + commentId,
@@ -64,7 +63,6 @@ $(document).ready(() => {
     $('#submitComment').on('click', function(){
         event.preventDefault();
         let commentContent = $('#user-comment').val().trim()
-       // let articleId = $('#comment-modal').data('id')
         console.log(articleId)
         if(commentContent.length > 0 && userId !== null){
             $('#user-comment').val('')
@@ -92,46 +90,25 @@ $(document).ready(() => {
             articleId = $(this).data('id');
             let icon = $(this).children()
             toggleIcon(icon)
+            let data = {
+                userId: userId,
+                articleId: articleId,
+                delete: false
+            }
+            if($(this).hasClass('favorite')){
+                data.delete = true;
+            }
             console.log(articleId)
             $.ajax({
                 type: 'POST',
                 url: '/favorite',
-                data: {
-                    userId: userId,
-                    articleId: articleId
-                }
+                data: data
             }).then(result => {
                 console.log(result)
             })
         }
     })
-/*
-    $('#favorites').on('click', function(){
-        if(username === null){
-            $('#user-modal').modal('show')
-        } else {
-            window.location.replace(`/favorites/${userId}`)
-           $('a.add-favorite').each(function(i, element){
-               let favIcon = $(element).children()
-               console.log($(element).attr('data-id'))
-            toggleIcon(favIcon)
-           })*/
-           
-         //   $.ajax({
-         //       type: 'GET',
-               // url: '/test'
-         //       url: '/favorites/' + userId
-         //   })//.then(result => {
-               // console.log(result)
-              //  $('#results').empty()
 
-               // $(document).html(result)
-              // document.write(result)
-             // location.reload()
-            // window.location.replace("/test")
-           // })
-      //  }
-   // })
 })
 
 function toggleIcon(icon){
@@ -158,7 +135,8 @@ function populateComments(comment){
 
 function findFavorites(articleIds){
     articleIds.forEach(article => {
-      let favIcon = $(`a.add-favorite[data-id='${article}']`).children()
+        let favBtn = $(`a.add-favorite[data-id='${article}']`).addClass("favorite")
+      let favIcon = favBtn.children()
         toggleIcon(favIcon)
     })
     
@@ -176,7 +154,13 @@ function signIn(user){
         localStorage.setItem('user', username)
         $('#user').addClass('disabled')
         findFavorites(result.articles)
-        $('#favorites').removeClass('disabled').attr('href', `/favorites/${userId}`)
+        $('#favorites').removeClass('disabled')
+        if($('#favorites').hasClass("displayed")){
+            $('#favorites').attr('href', '/')
+            $('#favorites').removeClass("displayed")
+        } else {
+            $('#favorites').attr('href', `/favorites/${userId}`)
+        }
 
         console.log(result)
     })
